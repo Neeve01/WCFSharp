@@ -63,7 +63,7 @@ namespace WCFSharp
                     ManagedIO.WriteInteger((IntPtr)OutBuffer, ref Offset, 2);
                     return 4;
                 case 2810:
-                    string Name = "wcfSharp";
+                    string Name = "WCFSharp";
                     uint Size = (uint)Name.Length * 2 + 4;
 
                     if (OutBufferSize == 0)

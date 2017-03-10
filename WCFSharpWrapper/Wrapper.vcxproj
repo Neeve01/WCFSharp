@@ -173,7 +173,7 @@
     <None Include="Source.def" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommfortPlugin\wcfSharp.csproj">
+    <ProjectReference Include="..\WCFSharp\WCFSharp.csproj">
       <Project>{0447460a-d58d-4d32-bd56-dba013ec6ad2}</Project>
     </ProjectReference>
   </ItemGroup>
