@@ -1,0 +1,9 @@
+EXPORTS
+PluginStart=PluginStart
+PluginStop=PluginStop
+
+PluginProcess=PluginProcess
+PluginGetData=PluginGetData
+
+PluginShowAbout=PluginShowAbout
+PluginShowOptions=PluginShowOptions
