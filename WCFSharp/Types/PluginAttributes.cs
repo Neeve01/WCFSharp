@@ -13,4 +13,5 @@ namespace WCFSharp.Types
     }
 
     public delegate void PluginStartDelegate();
+    public delegate void PluginStopDelegate();
 }

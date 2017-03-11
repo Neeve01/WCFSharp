@@ -84,6 +84,10 @@
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1-beta1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -103,6 +107,16 @@
     <Compile Include="Commfort\Client\User.cs" />
     <Compile Include="Commfort\Commfort.cs" />
     <Compile Include="Commfort\Client\Channel.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="GUI\ConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\ConfigForm.Designer.cs">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\GUIContainer.cs" />
+    <Compile Include="Plugins\AssemblyEntry.cs" />
+    <Compile Include="Plugins\PluginsLoader.cs" />
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Commfort\Client\Events.cs" />
     <Compile Include="Export.cs" />
@@ -112,6 +126,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Commfort\Server\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GUI\ConfigForm.resx">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

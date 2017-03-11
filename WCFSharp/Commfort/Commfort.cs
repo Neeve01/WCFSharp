@@ -31,7 +31,6 @@ namespace WCFSharp
                 return false; // to do
             }
         }
-        internal static List<Delegate> Subscriptions;
         internal static TaskScheduler Scheduler;
         internal static CancellationTokenSource TokenSource;
         internal static List<object> Handlers;
@@ -208,12 +207,28 @@ namespace WCFSharp
         {
             public static void RegisterEventHandler(object Handler)
             {
+                var assembly = Handler.GetType().Assembly;
+
+                var entry = ConfigContainer.Config.Assemblies.FirstOrDefault(x => x.Assembly == assembly);
+                if (entry == null)
+                    throw new ArgumentException("Couldn't register handler. Unknown assembly.", "Handler");
+
+                if (!entry.Handlers.Contains(Handler))
+                    entry.Handlers.Add(Handler);
+
                 if (!Handlers.Contains(Handler))
                     Handlers.Add(Handler);
             }
 
             public static void UnregisterEventHandler(object Handler)
             {
+                var assembly = Handler.GetType().Assembly;
+
+                var entry = ConfigContainer.Config.Assemblies.FirstOrDefault(x => x.Assembly == assembly);
+                if (entry == null)
+                    throw new ArgumentException("Couldn't unregister handler. Unknown assembly.", "Handler");
+                entry.Handlers.RemoveAll(x => x == Handler);
+
                 Handlers.RemoveAll(x => x == Handler);
             }
 

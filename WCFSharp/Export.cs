@@ -8,6 +8,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
+using WCFSharp.GUI;
+using Newtonsoft.Json;
+using WCFSharp.Plugins;
 
 namespace WCFSharp
 {
@@ -50,49 +53,26 @@ namespace WCFSharp
         unsafe public static bool Start(uint ThisPluginID, void* Process, void* GetData)
         {
             try
-            {
-                var sync = new SynchronizationContext();
-
+            {                
                 Commfort.pluginID = ThisPluginID;
                 CFProcess = (CommfortProcess)Marshal.GetDelegateForFunctionPointer((IntPtr)Process, typeof(CommfortProcess));
                 CFGetData = (CommfortGetData)Marshal.GetDelegateForFunctionPointer((IntPtr)GetData, typeof(CommfortGetData));
 
-                Commfort.Subscriptions = new List<Delegate>();
-                Commfort.Handlers = new List<object>();
+                PluginsHandler.Reload();
+
+                // Create form
+                GUIContainer.ConfigForm = new ConfigForm();
+                GUIContainer.ConfigForm.HandleCreated += (sender, e) =>
+                {
+                    PluginsHandler.FillConfigWindow();
+                };
 
                 var oldcontext = SynchronizationContext.Current;
-
+                var sync = new SynchronizationContext();
                 SynchronizationContext.SetSynchronizationContext(sync);
                 Commfort.Scheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 Commfort.TokenSource = new CancellationTokenSource();
                 SynchronizationContext.SetSynchronizationContext(oldcontext);
-
-                if (!Directory.Exists("NetPlugins"))
-                    Directory.CreateDirectory("NetPlugins");
-
-                var files = Directory.GetFiles("NetPlugins", "*.dll", SearchOption.AllDirectories);
-                foreach (var file in files)
-                {
-                    try
-                    {
-                        Commfort.DebugMessage($"Loading assembly {Path.GetFileName(file)}...");
-                        var assembly = Assembly.LoadFrom(file);
-                        var methods = assembly.GetTypes()
-                                .SelectMany(t => t.GetMethods())
-                                .Where(method => method.GetCustomAttributes(typeof(PluginStartAttribute), false).Length > 0)
-                                .ToList();
-
-                        foreach (var method in methods)
-                        {
-                            var del = (PluginStartDelegate)method.CreateDelegate(typeof(PluginStartDelegate));
-                            del?.Invoke();
-                        }
-                    }
-                    catch (Exception E)
-                    {
-                        Commfort.DebugMessage($"Couldn't load assembly {Path.GetFileName(file)}!\n{E.Message}");
-                    }
-                }
             }
             catch (Exception E)
             {
@@ -105,6 +85,11 @@ namespace WCFSharp
         public static void Stop()
         {
             Commfort.TokenSource.Cancel();
+            ConfigContainer.Save();
+            GUIContainer.ConfigForm.Close();
+            GUIContainer.ConfigForm.Dispose();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
 
         unsafe public static void Process(uint ID, void* Buffer, uint BufferSize)
@@ -112,7 +97,10 @@ namespace WCFSharp
             Commfort.ProcessIncomingData(ID, (IntPtr)Buffer, BufferSize);
         }
 
-        public static void ShowOptions() { }
+        public static void ShowOptions()
+        {
+            GUIContainer.ConfigForm?.Show();
+        }
 
         public static void ShowAbout() { }
     }
