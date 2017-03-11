@@ -26,10 +26,9 @@ namespace WCFSharp
                 UserChannelJoin = 32,
                 UserChannelLeave = 33,
                 ChannelTopicChange = 6
-
             }
 
-            internal enum OutEventType
+            internal enum ProcedureType
             {
                 PrintTextInEvents = 100,
                 SendPersonalMessage = 70,
@@ -60,7 +59,7 @@ namespace WCFSharp
                     WriteToHistory ? 1 : 0,
                     Message
                 );
-                Process(OutEventType.PrintTextInEvents, outbuf);
+                Process(ProcedureType.PrintTextInEvents, outbuf);
             }
 
             internal static void JoinChannel(string Channel, bool ShowInChannelList = true, bool InviteOnly = true)
@@ -83,7 +82,7 @@ namespace WCFSharp
                     type,
                     Channel
                 );
-                Process(OutEventType.JoinChannel, outbuf);
+                Process(ProcedureType.JoinChannel, outbuf);
             }
 
             internal static void LeaveChannel(string Channel)
@@ -95,7 +94,7 @@ namespace WCFSharp
                 (
                     Channel
                 );
-                Process(OutEventType.LeaveChannel, outbuf);
+                Process(ProcedureType.LeaveChannel, outbuf);
             }
 
             internal static void LeavePrivateChannel(string Username)
@@ -107,7 +106,7 @@ namespace WCFSharp
                 (
                     Username
                 );
-                Process(OutEventType.LeavePrivateChannel, outbuf);
+                Process(ProcedureType.LeavePrivateChannel, outbuf);
             }
 
             internal static void SendMessage(string Channel, string Message, MessageType Type = MessageType.Default)
@@ -123,7 +122,7 @@ namespace WCFSharp
                     (int)Type,
                     Message
                 );
-                Process(OutEventType.SendMessage, outbuf);
+                Process(ProcedureType.SendMessage, outbuf);
             }
 
             internal static void SendMessage(Channel Channel, string Message, MessageType Type = MessageType.Default)
@@ -144,7 +143,7 @@ namespace WCFSharp
                     (int)Type,
                     Message
                 );
-                Process(OutEventType.SendPrivateMessage, outbuf);
+                Process(ProcedureType.SendPrivateMessage, outbuf);
             }
 
             internal static void SendMessage(User User, string Message, MessageType Type = MessageType.Default)
@@ -189,7 +188,7 @@ namespace WCFSharp
                         (int)Format,
                         data
                     );
-                    Process(OutEventType.SendPicture, outbuf);
+                    Process(ProcedureType.SendPicture, outbuf);
                 }
             }
 
@@ -230,7 +229,7 @@ namespace WCFSharp
                         (int)Format,
                         data
                     );
-                    Process(OutEventType.SendPrivatePicture, outbuf);
+                    Process(ProcedureType.SendPrivatePicture, outbuf);
                 }
             }
 
@@ -246,7 +245,7 @@ namespace WCFSharp
                     TurnOffSounds ? 1 : 0,
                     TurnOffNotifications ? 1 : 0
                 );
-                Process(OutEventType.ChangeStatus, outbuf);
+                Process(ProcedureType.ChangeStatus, outbuf);
             }
 
             internal static void ChangeChannelTopic(string Channel, string NewTopic)
@@ -259,7 +258,7 @@ namespace WCFSharp
                     Channel,
                     NewTopic
                 );
-                Process(OutEventType.ChangeChannelTopic, outbuf);
+                Process(ProcedureType.ChangeChannelTopic, outbuf);
             }
 
             internal static void ChangeChannelTopic(Channel Channel, string NewTopic)
@@ -277,7 +276,7 @@ namespace WCFSharp
                     Channel,
                     NewGreeting
                 );
-                Process(OutEventType.ChangeChannelGreeting, outbuf);
+                Process(ProcedureType.ChangeChannelGreeting, outbuf);
             }
 
             internal static void ChangeChannelGreeting(Channel Channel, string NewTopic)
@@ -294,7 +293,7 @@ namespace WCFSharp
                 (
                     Channel
                 );
-                Process(OutEventType.ClearChannel, outbuf);
+                Process(ProcedureType.ClearChannel, outbuf);
             }
 
             internal static void ClearChannel(Channel Channel)
@@ -312,7 +311,7 @@ namespace WCFSharp
                     Receiver,
                     Data
                 );
-                Process(OutEventType.SendDataToServer, outbuf);
+                Process(ProcedureType.SendDataToServer, outbuf);
             }
         }
     }

@@ -22,8 +22,6 @@ namespace WCFSharp
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         internal unsafe delegate uint CommfortGetData(uint PluginID, uint FuncID, byte* InBuffer, uint InBufferSize, byte* OutBuffer, uint OutBufferSize);
 
-        internal static uint PluginID = 0;
-
         internal static CommfortProcess CFProcess;
         internal static CommfortGetData CFGetData;
 
@@ -60,7 +58,7 @@ namespace WCFSharp
                     if (OutBufferSize == 0)
                         return 4;
 
-                    ManagedIO.WriteInteger((IntPtr)OutBuffer, ref Offset, 2);
+                    StaticPointerWriter.WriteInteger((IntPtr)OutBuffer, ref Offset, 2);
                     return 4;
                 case 2810:
                     string Name = "WCFSharp";
@@ -69,7 +67,7 @@ namespace WCFSharp
                     if (OutBufferSize == 0)
                         return Size;
 
-                    ManagedIO.WriteString((IntPtr)OutBuffer, ref Offset, Name);
+                    StaticPointerWriter.WriteString((IntPtr)OutBuffer, ref Offset, Name);
                     return Size;
             }
 
@@ -82,7 +80,7 @@ namespace WCFSharp
             {
                 var sync = new SynchronizationContext();
 
-                PluginID = ThisPluginID;
+                Commfort.pluginID = ThisPluginID;
                 CFProcess = (CommfortProcess)Marshal.GetDelegateForFunctionPointer((IntPtr)Process, typeof(CommfortProcess));
                 CFGetData = (CommfortGetData)Marshal.GetDelegateForFunctionPointer((IntPtr)GetData, typeof(CommfortGetData));
 
@@ -126,6 +124,7 @@ namespace WCFSharp
             catch (Exception E)
             {
                 MessageBox.Show(E.Message);
+                return false;
             }
             return true;
         }

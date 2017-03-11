@@ -12,9 +12,9 @@ namespace SamplePlugin
     {
         public async Task OnMessage(WCFSharp.Types.ClientEvents.MessageEvent e)
         {
-            if (!e.Message.StartsWith("Repeating: "))
+            if (e.Message.StartsWith("!serveraddress"))
             {
-                await Commfort.Client.SendMessageAsync(e.Channel, $"Repeating: {e.Message}");
+                await Commfort.Client.SendMessageAsync(e.Channel, $"Server address: {await Commfort.Client.GetServerAddressAsync()}");
             }
         }
     }

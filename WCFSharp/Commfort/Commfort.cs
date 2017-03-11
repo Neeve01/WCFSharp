@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,23 @@ namespace WCFSharp
 {
     public static partial class Commfort
     {
-        public static readonly bool IsServer = false;
+        internal static uint pluginID = 0;
+        
+        public static uint PluginID
+        {
+            get
+            {
+                return pluginID;
+            }
+        }
+
+        public static bool IsServer
+        {
+            get
+            {
+                return false; // to do
+            }
+        }
         internal static List<Delegate> Subscriptions;
         internal static TaskScheduler OutEventsScheduler;
         internal static CancellationTokenSource TokenSource;
@@ -22,12 +39,40 @@ namespace WCFSharp
 
         unsafe internal static void Process(uint OutEvent, IntPtr Buffer, uint BufferSize)
         {
-            Export.CFProcess(Export.PluginID, OutEvent, (byte*)Buffer, BufferSize); 
+            Export.CFProcess(Commfort.PluginID, OutEvent, (byte*)Buffer, BufferSize); 
         }
 
-        internal static void Process(Client.OutEventType OutEvent, OutBuffer Buffer)
+        internal static void Process(Client.ProcedureType OutEvent, OutBuffer Buffer)
         {
             Process((uint)OutEvent, Buffer.MemoryPointer, (uint)Buffer.Size);
+        }
+
+        /// <summary>
+        /// DONT FREAKING FORGET TO DEALLOCATE RETURNED INTPTR GOD DAMMIT.
+        /// Also, there's no reason to use this.
+        /// Note for myself.
+        /// </summary>
+        unsafe internal static IntPtr GetData(uint FuncID, OutBuffer Buffer, out uint Size)
+        {
+            Size = Export.CFGetData(PluginID, FuncID, null, 0, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
+
+            IntPtr dataPtr;
+            if (Size != 0)
+                dataPtr = Marshal.AllocHGlobal((int)Size);
+            else
+                throw new AccessViolationException();
+
+            Export.CFGetData(PluginID, FuncID, (byte*)dataPtr, Size, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
+
+            return dataPtr;
+        }
+
+        /// <summary>
+        /// DONT FREAKING FORGET TO DEALLOCATE RETURNED INTPTR GOD DAMMIT.
+        /// </summary>
+        internal static IntPtr GetData(Client.GetterType Type, OutBuffer Buffer, out uint Size)
+        {
+            return GetData((uint)Type, Buffer, out Size);
         }
 
         internal static void DebugMessage(object anything)
@@ -42,27 +87,25 @@ namespace WCFSharp
             }
         }
 
-        internal static void ProcessIncomingData(uint ID, IntPtr Buffer, uint BufferSize)
+        internal static void ProcessIncomingData(uint ID, IntPtr DataBuffer, uint DataBufferSize)
         {
-            int Offset = 0;
-
+            int Position = 0;
             if (!Commfort.IsServer)
             {
-                var BufPtr = (IntPtr)Buffer;
                 switch ((Commfort.Client.InEventType)ID)
                 {
                     case Commfort.Client.InEventType.Message:
                         {
-                            var Username = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var IP = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Icon = (UserIcon)ManagedIO.ReadInteger(BufPtr, ref Offset);
-                            var Channel = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Type = (MessageType)ManagedIO.ReadInteger(BufPtr, ref Offset);
-                            var Message = ManagedIO.ReadString(BufPtr, ref Offset);
+                            var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
+                            var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Type = (MessageType)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
+                            var Message = StaticPointerReader.ReadString(DataBuffer, ref Position);
 
                             if (Type == MessageType.Picture)
                             {
-                                var Data = ManagedIO.ReadData(BufPtr, ref Offset);
+                                var Data = StaticPointerReader.ReadData(DataBuffer, ref Position);
 
                                 using (var stream = new MemoryStream(Data))
                                 {
@@ -81,7 +124,7 @@ namespace WCFSharp
 
                     case Commfort.Client.InEventType.ConnectionStatusChange:
                         {
-                            var NewState = (ConnectionState)ManagedIO.ReadInteger(BufPtr, ref Offset);
+                            var NewState = (ConnectionState)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
                             Events.PushEvent(new ConnectionChangeEvent(NewState));
                         }
@@ -89,9 +132,9 @@ namespace WCFSharp
 
                     case Commfort.Client.InEventType.UserConnected:
                         {
-                            var Username = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var IP = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Icon = (UserIcon)ManagedIO.ReadInteger(BufPtr, ref Offset);
+                            var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
                             Events.PushEvent(new UserConnectedEvent(new User(Username, Icon, IP)));
                         }
@@ -99,9 +142,9 @@ namespace WCFSharp
 
                     case Commfort.Client.InEventType.UserDisconnected:
                         {
-                            var Username = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var IP = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Icon = (UserIcon)ManagedIO.ReadInteger(BufPtr, ref Offset);
+                            var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
                             Events.PushEvent(new UserDisconnectedEvent(new User(Username, Icon, IP)));
                         }
@@ -109,7 +152,7 @@ namespace WCFSharp
 
                     case Commfort.Client.InEventType.LocalUserChannelJoin:
                         {
-                            var Channel = ManagedIO.ReadString(BufPtr, ref Offset);
+                            var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
 
                             Events.PushEvent(new LocalUserChannelJoinEvent(new Channel(Channel)));
                         }
@@ -117,17 +160,17 @@ namespace WCFSharp
 
                     case Commfort.Client.InEventType.LocalUserChannelLeave:
                         {
-                            var Channel = ManagedIO.ReadString(BufPtr, ref Offset);
+                            var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             Events.PushEvent(new LocalUserChannelLeaveEvent(new Channel(Channel)));
                         }
                         break;
 
                     case Commfort.Client.InEventType.UserChannelJoin:
                         {
-                            var Channel = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Username = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var IP = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Icon = (UserIcon)ManagedIO.ReadInteger(BufPtr, ref Offset);
+                            var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
                             Events.PushEvent(new UserChannelJoinEvent(new Channel(Channel), new User(Username, Icon, IP)));
                         }
@@ -135,21 +178,21 @@ namespace WCFSharp
 
                     case Commfort.Client.InEventType.UserChannelLeave:
                         {
-                            var Channel = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Username = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var IP = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Icon = (UserIcon)ManagedIO.ReadInteger(BufPtr, ref Offset);
+                            var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
                             Events.PushEvent(new UserChannelLeaveEvent(new Channel(Channel), new User(Username, Icon, IP)));
                         }
                         break;
 
                     case Commfort.Client.InEventType.ChannelTopicChange:
                         {
-                            var Username = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var IP = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var Icon = (UserIcon)ManagedIO.ReadInteger(BufPtr, ref Offset);
-                            var Channel = ManagedIO.ReadString(BufPtr, ref Offset);
-                            var NewTopic = ManagedIO.ReadString(BufPtr, ref Offset);
+                            var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
+                            var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var NewTopic = StaticPointerReader.ReadString(DataBuffer, ref Position);
 
                             Events.PushEvent(new ChannelTopicChangeEvent(new Channel(Channel), NewTopic, new User(Username, Icon, IP)));
                         }
