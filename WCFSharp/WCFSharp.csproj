@@ -107,7 +107,6 @@
     <Compile Include="Export.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Types\PluginAttributes.cs" />
-    <Compile Include="Types\TaskExt.cs" />
     <Compile Include="Types\User.cs" />
     <Compile Include="Types\Readers.cs" />
   </ItemGroup>

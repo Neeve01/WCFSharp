@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Microsoft.CSharp;
-using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Windows.Forms;
-using System.Diagnostics;
 using WCFSharp.Types;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Drawing;
 using System.IO;
 
 namespace WCFSharp
