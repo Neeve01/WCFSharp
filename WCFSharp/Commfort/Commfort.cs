@@ -231,7 +231,7 @@ namespace WCFSharp
                                     ).ToList();
                     methods.ForEach(x => x?.Invoke(handler, new object[] { Event }));
                 });
-                if ((DateTime.Now - LastGC).TotalSeconds > 10)
+                if ((DateTime.Now - LastGC).TotalSeconds > 60) // This should be in config, but right now there's no config at all.
                 {
                     LastGC = DateTime.Now;
                     GC.WaitForPendingFinalizers();
