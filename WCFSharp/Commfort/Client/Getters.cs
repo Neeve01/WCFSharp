@@ -321,7 +321,7 @@ namespace WCFSharp
             internal static LocalUserInfo GetLocalUserInfo()
             {
                 uint size = 0;
-                var dataPtr = Commfort.GetData(GetterType.GetUserInfo, null, out size);
+                var dataPtr = Commfort.GetData(GetterType.GetLocalUserInfo, null, out size);
 
                 LocalUserInfo userInfo;
 
@@ -342,7 +342,7 @@ namespace WCFSharp
                     try
                     {
                         using (var stream = new MemoryStream(avatardata))
-                            avatar = Image.FromStream(stream);
+                            avatar = Image.FromStream(stream, true, true);
                     } catch
                     {
                         // handle exception

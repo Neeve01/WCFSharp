@@ -202,6 +202,8 @@ namespace WCFSharp
             }
         }
 
+        internal static DateTime LastGC = DateTime.Now; 
+
         public static class Events
         {
             public static void RegisterEventHandler(object Handler)
@@ -229,6 +231,12 @@ namespace WCFSharp
                                     ).ToList();
                     methods.ForEach(x => x?.Invoke(handler, new object[] { Event }));
                 });
+                if ((DateTime.Now - LastGC).TotalSeconds > 10)
+                {
+                    LastGC = DateTime.Now;
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
             }
         }
     }

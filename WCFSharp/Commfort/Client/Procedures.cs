@@ -145,6 +145,25 @@ namespace WCFSharp
                 SendMessage(User.Name, Message, Type);
             }
 
+            internal static void SendPersonalMessage(string Username, string Message, bool Important = false)
+            {
+                if (IsServer)
+                    return;
+
+                var outbuf = new OutBuffer
+                (
+                    Username,
+                    Important ? 1 : 0,
+                    Message
+                );
+                Process(ProcedureType.SendPersonalMessage, outbuf);
+            }
+
+            internal static void SendPersonalMessage(User User, string Message, bool Important = false)
+            {
+                SendPersonalMessage(User.Name, Message, Important);
+            }
+
             internal static void SendPicture(string Channel, Image Picture, CommfortPictureFormat Format = CommfortPictureFormat.Jpeg)
             {
                 if (IsServer)
