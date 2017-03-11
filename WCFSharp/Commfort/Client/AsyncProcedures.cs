@@ -20,7 +20,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     PrintMessageToEvents(Message, Style, WithTime, WriteToHistory);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -35,7 +35,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     SendMessage(Channel, Message, Type);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -50,7 +50,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     JoinChannel(Channel, ShowInChannelList, InviteOnly);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -63,7 +63,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     LeaveChannel(Channel);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -76,7 +76,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     LeavePrivateChannel(Username);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -103,7 +103,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     SendPrivateMessage(Username, Message, Type);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -130,7 +130,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     SendPicture(Channel, Picture, Format);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -145,7 +145,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     SendPrivatePicture(Username, Picture, Format);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -161,7 +161,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ChangeStatus(NewStatus, IgnoreImportantFlag, TurnOffSounds, TurnOffNotifications);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -175,7 +175,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ChangeChannelTopic(Channel, NewTopic);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -189,7 +189,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ChangeChannelTopic(Channel.Name, NewTopic);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -203,7 +203,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ChangeChannelGreeting(Channel, NewGreeting);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -217,7 +217,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ChangeChannelGreeting(Channel.Name, NewTopic);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -230,7 +230,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ClearChannel(Channel);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -243,7 +243,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     ClearChannel(Channel.Name);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
 
             /// <summary>
@@ -257,7 +257,7 @@ namespace WCFSharp
                 await Task.Factory.StartNew(() =>
                 {
                     SendDataToServer(Receiver, Data);
-                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.OutEventsScheduler);
+                }, Commfort.TokenSource.Token, TaskCreationOptions.None, Commfort.Scheduler);
             }
         }
     }

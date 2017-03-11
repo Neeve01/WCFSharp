@@ -7,7 +7,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using WCFSharp.Types;
-using WCFSharp.Types.ClientEvents;
+using static WCFSharp.Commfort.Client;
+using static WCFSharp.Commfort.Client.Events;
 
 namespace WCFSharp
 {
@@ -31,7 +32,7 @@ namespace WCFSharp
             }
         }
         internal static List<Delegate> Subscriptions;
-        internal static TaskScheduler OutEventsScheduler;
+        internal static TaskScheduler Scheduler;
         internal static CancellationTokenSource TokenSource;
         internal static List<object> Handlers;
 
@@ -58,7 +59,9 @@ namespace WCFSharp
             if (Size != 0)
                 dataPtr = Marshal.AllocHGlobal((int)Size);
             else
-                throw new AccessViolationException();
+            {
+                return IntPtr.Zero;
+            }
 
             Export.CFGetData(PluginID, FuncID, (byte*)dataPtr, Size, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
 
@@ -95,7 +98,7 @@ namespace WCFSharp
                     case Commfort.Client.InEventType.Message:
                         {
                             var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
-                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Address = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
                             var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Type = (MessageType)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
@@ -110,12 +113,12 @@ namespace WCFSharp
                                     Image picture;
                                     picture = Image.FromStream(stream);
 
-                                    Events.PushEvent(new PictureEvent(new User(Username, Icon, IP), new Channel(Channel), picture));
+                                    Events.PushEvent(new PictureEvent(new User(Username), new Channel(Channel), picture));
                                 }
                             }
                             else
                             {
-                                Events.PushEvent(new MessageEvent(new User(Username, Icon, IP), new Channel(Channel), Type, Message));
+                                Events.PushEvent(new MessageEvent(new User(Username), new Channel(Channel), Type, Message));
                             }
                         }
                         break;
@@ -131,20 +134,20 @@ namespace WCFSharp
                     case Commfort.Client.InEventType.UserConnected:
                         {
                             var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
-                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Address = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
-                            Events.PushEvent(new UserConnectedEvent(new User(Username, Icon, IP)));
+                            Events.PushEvent(new UserConnectedEvent(new User(Username)));
                         }
                         break;
 
                     case Commfort.Client.InEventType.UserDisconnected:
                         {
                             var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
-                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Address = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
-                            Events.PushEvent(new UserDisconnectedEvent(new User(Username, Icon, IP)));
+                            Events.PushEvent(new UserDisconnectedEvent(Username, Icon, Address));
                         }
                         break;
 
@@ -167,10 +170,10 @@ namespace WCFSharp
                         {
                             var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
-                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Address = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
 
-                            Events.PushEvent(new UserChannelJoinEvent(new Channel(Channel), new User(Username, Icon, IP)));
+                            Events.PushEvent(new UserChannelJoinEvent(new Channel(Channel), new User(Username)));
                         }
                         break;
 
@@ -178,21 +181,21 @@ namespace WCFSharp
                         {
                             var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
-                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Address = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
-                            Events.PushEvent(new UserChannelLeaveEvent(new Channel(Channel), new User(Username, Icon, IP)));
+                            Events.PushEvent(new UserChannelLeaveEvent(new Channel(Channel), new User(Username)));
                         }
                         break;
 
                     case Commfort.Client.InEventType.ChannelTopicChange:
                         {
                             var Username = StaticPointerReader.ReadString(DataBuffer, ref Position);
-                            var IP = StaticPointerReader.ReadString(DataBuffer, ref Position);
+                            var Address = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var Icon = (UserIcon)StaticPointerReader.ReadInteger(DataBuffer, ref Position);
                             var Channel = StaticPointerReader.ReadString(DataBuffer, ref Position);
                             var NewTopic = StaticPointerReader.ReadString(DataBuffer, ref Position);
 
-                            Events.PushEvent(new ChannelTopicChangeEvent(new Channel(Channel), NewTopic, new User(Username, Icon, IP)));
+                            Events.PushEvent(new ChannelTopicChangeEvent(new Channel(Channel), NewTopic, new User(Username)));
                         }
                         break;
                 }

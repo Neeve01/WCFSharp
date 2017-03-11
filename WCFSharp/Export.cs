@@ -86,7 +86,7 @@ namespace WCFSharp
                 var oldcontext = SynchronizationContext.Current;
 
                 SynchronizationContext.SetSynchronizationContext(sync);
-                Commfort.OutEventsScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                Commfort.Scheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 Commfort.TokenSource = new CancellationTokenSource();
                 SynchronizationContext.SetSynchronizationContext(oldcontext);
 

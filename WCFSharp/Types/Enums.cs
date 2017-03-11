@@ -1,5 +1,11 @@
 ﻿namespace WCFSharp.Types
 {
+    public enum PluginSide
+    {
+        Server = 0,
+        Client = 1
+    }
+
     public enum EventMessageStyle
     {
         Default = 0,
