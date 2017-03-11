@@ -36,6 +36,17 @@ namespace WCFSharp.Types
 
     internal static class StaticPointerReader
     {
+        public static double ReadDouble(IntPtr MemoryPointer, ref int Position)
+        {
+            var doublebytes = new byte[8];
+            Marshal.Copy(MemoryPointer + Position, doublebytes, 0, 8);
+            var d = BitConverter.ToDouble(doublebytes, 0);
+            Position += 8;
+
+            return d;
+        }
+
+
         public static int ReadInteger(IntPtr MemoryPointer, ref int Position)
         {
             var intbytes = new byte[4];
@@ -55,8 +66,11 @@ namespace WCFSharp.Types
             var count = BitConverter.ToInt32(intbytes, 0);
 
             var stringbytes = new byte[count * 2];
-            Marshal.Copy(MemoryPointer + Position, stringbytes, 0, stringbytes.Length);
-            Position += stringbytes.Length;
+            if (stringbytes.Length != 0)
+            {
+                Marshal.Copy(MemoryPointer + Position, stringbytes, 0, stringbytes.Length);
+                Position += stringbytes.Length;
+            }
 
             var str = Encoding.Unicode.GetString(stringbytes);
             return str;
@@ -71,8 +85,11 @@ namespace WCFSharp.Types
             var count = BitConverter.ToInt32(intbytes, 0);
 
             var bytes = new byte[count];
-            Marshal.Copy(MemoryPointer + Position, bytes, 0, bytes.Length);
-            Position += bytes.Length;
+            if (bytes.Length != 0)
+            {
+                Marshal.Copy(MemoryPointer + Position, bytes, 0, bytes.Length);
+                Position += bytes.Length;
+            }
 
             return bytes;
         }

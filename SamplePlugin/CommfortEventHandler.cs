@@ -23,6 +23,11 @@ namespace SamplePlugin
                 await Commfort.Client.SendMessageAsync(e.Channel, $"Server address: {await Commfort.Client.GetServerAddressAsync()}");
             }
 
+            if (e.Message.StartsWith("!myavatar"))
+            {
+                
+            }
+
             if (e.Message.StartsWith("!userinfo"))
             {
                 var sb = new StringBuilder();

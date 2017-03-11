@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using WCFSharp.Types;
 
@@ -20,12 +23,12 @@ namespace WCFSharp
                 GetActiveChannel = 14, //v
                 GetCurrentChannels = 15, //v
                 GetCurrentPrivateChannels = 16, //v
-                GetUsersInChannel = 17,
-                GetUsersInChat = 18,
+                GetUsersInChannel = 17, //v
+                GetUsersInChat = 18, //v
                 GetLocalUserRights = 19,
-                GetUserInfo = 20, //v
+                GetUserInfo = 20, 
                 GetChannelInfo = 21, 
-                GetCurrentUserInfo = 22
+                GetLocalUserInfo = 22 
             }
 
             internal static string GetServerAddress()
@@ -160,8 +163,25 @@ namespace WCFSharp
 
                 for (int i = 1; i <= count; i++)
                 {
-                    var channel = StaticPointerReader.ReadString(dataPtr, ref position);
-                    yield return new User(channel);
+                    var user = StaticPointerReader.ReadString(dataPtr, ref position);
+                    yield return new User(user);
+                }
+
+                Marshal.FreeHGlobal(dataPtr);
+            }
+
+            internal static IEnumerable<User> GetCurrentPrivateChannelsStatic()
+            {
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetCurrentPrivateChannels, null, out size);
+
+                var position = 0;
+                var count = StaticPointerReader.ReadInteger(dataPtr, ref position);
+
+                for (int i = 1; i <= count; i++)
+                {
+                    var user = StaticPointerReader.ReadString(dataPtr, ref position);
+                    yield return new User(user);
                 }
 
                 Marshal.FreeHGlobal(dataPtr);
@@ -197,6 +217,207 @@ namespace WCFSharp
                 Marshal.FreeHGlobal(dataPtr);
 
                 return userInfo;
+            }
+
+            internal static UserInfo GetUserInfo(User User)
+            {
+                return GetUserInfo(User.Name);
+            }
+
+            internal static IEnumerable<User> GetUsersInChannel(string Channel)
+            {
+                var buffer = new OutBuffer(new object[]
+                {
+                    Channel
+                });
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUsersInChannel, buffer, out size);
+
+                var position = 0;
+                var count = StaticPointerReader.ReadInteger(dataPtr, ref position);
+                for (int i = 1; i <= count; i++)
+                {
+                    var Username = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var Address = StaticPointerReader.ReadString(dataPtr, ref position); // Not necessary
+                    var Icon = (UserIcon)StaticPointerReader.ReadInteger(dataPtr, ref position); // Not necessary
+
+                    yield return new User(Username);
+                }
+
+                Marshal.FreeHGlobal(dataPtr);
+            }
+
+            internal static IEnumerable<User> GetUsersInChannel(Channel Channel)
+            {
+                return GetUsersInChannel(Channel.Name);
+            }
+
+            internal static IEnumerable<StaticUserInfo> GetUsersInChannelStatic(string Channel)
+            {
+                var buffer = new OutBuffer(new object[]
+                {
+                    Channel
+                });
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUsersInChannel, buffer, out size);
+
+                var position = 0;
+                var count = StaticPointerReader.ReadInteger(dataPtr, ref position);
+                for (int i = 1; i <= count; i++)
+                {
+                    var Username = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var Address = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var Icon = (UserIcon)StaticPointerReader.ReadInteger(dataPtr, ref position);
+
+                    yield return new StaticUserInfo(Username, Address, Icon);
+                }
+
+                Marshal.FreeHGlobal(dataPtr);
+            }
+
+            internal static IEnumerable<StaticUserInfo> GetUsersInChannelStatic(Channel Channel)
+            {
+                return GetUsersInChannelStatic(Channel.Name);
+            }
+
+            internal static IEnumerable<User> GetUsersInChat()
+            {
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUsersInChat, null, out size);
+
+                var position = 0;
+                var count = StaticPointerReader.ReadInteger(dataPtr, ref position);
+                for (int i = 1; i <= count; i++)
+                {
+                    var Username = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var Address = StaticPointerReader.ReadString(dataPtr, ref position); // Not necessary
+                    var Icon = (UserIcon)StaticPointerReader.ReadInteger(dataPtr, ref position); // Not necessary
+
+                    yield return new User(Username);
+                }
+
+                Marshal.FreeHGlobal(dataPtr);
+            }
+
+            internal static IEnumerable<StaticUserInfo> GetUsersInChatStatic()
+            {
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUsersInChat, null, out size);
+
+                var position = 0;
+                var count = StaticPointerReader.ReadInteger(dataPtr, ref position);
+                for (int i = 1; i <= count; i++)
+                {
+                    var Username = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var Address = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var Icon = (UserIcon)StaticPointerReader.ReadInteger(dataPtr, ref position);
+
+                    yield return new StaticUserInfo(Username, Address, Icon);
+                }
+
+                Marshal.FreeHGlobal(dataPtr);
+            }
+
+            internal static LocalUserInfo GetLocalUserInfo()
+            {
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUserInfo, null, out size);
+
+                LocalUserInfo userInfo;
+
+                var position = 0;
+
+                var icon = (UserIcon)StaticPointerReader.ReadInteger(dataPtr, ref position);
+                var fullname = StaticPointerReader.ReadString(dataPtr, ref position);
+                var birthdate = StaticPointerReader.ReadString(dataPtr, ref position);
+                var contacts = StaticPointerReader.ReadString(dataPtr, ref position);
+                var work = StaticPointerReader.ReadString(dataPtr, ref position);
+                var notes = StaticPointerReader.ReadString(dataPtr, ref position);
+                var avatartype = (LocalUserAvatarType)StaticPointerReader.ReadInteger(dataPtr, ref position);
+                var avatardata = StaticPointerReader.ReadData(dataPtr, ref position);
+
+                Image avatar = null;
+                if (avatardata.Length != 0)
+                {
+                    try
+                    {
+                        using (var stream = new MemoryStream(avatardata))
+                            avatar = Image.FromStream(stream);
+                    } catch
+                    {
+                        // handle exception
+                    }
+                }
+
+                userInfo = new LocalUserInfo(icon, fullname, birthdate, contacts, work, notes, avatartype, avatar);
+
+                Marshal.FreeHGlobal(dataPtr);
+
+                return userInfo;
+            }
+
+            internal static ChannelInfo GetChannelInfo(string Channel)
+            {
+                var buffer = new OutBuffer(new object[]
+                {
+                    Channel
+                });
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUserInfo, buffer, out size);
+
+                ChannelInfo chanInfo;
+
+                if (size == 0)
+                {
+                    Marshal.FreeHGlobal(dataPtr);
+                    return new ChannelInfo();
+                }
+                else
+                {
+                    var position = 0;
+
+                    var topic = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var lastchanger = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var lastchangetime = StaticPointerReader.ReadDouble(dataPtr, ref position);
+                    var greeting = StaticPointerReader.ReadString(dataPtr, ref position);
+                    var picturemode = (ChannelPictureMode)StaticPointerReader.ReadInteger(dataPtr, ref position);
+                    var visible = StaticPointerReader.ReadInteger(dataPtr, ref position) == 1 ? true : false;
+                    var @private = StaticPointerReader.ReadInteger(dataPtr, ref position) == 1 ? true : false;
+                    var topiclocked = StaticPointerReader.ReadInteger(dataPtr, ref position) == 1 ? true : false;
+                    chanInfo = new ChannelInfo(topic, new User(lastchanger), DateTime.FromOADate(lastchangetime), greeting, picturemode, visible, @private, topiclocked);
+
+                    Marshal.FreeHGlobal(dataPtr);
+
+                    return chanInfo;
+                }
+            }
+
+            internal static ChannelInfo GetChannelInfo(Channel Channel)
+            {
+                return GetChannelInfo(Channel.Name);
+            }
+
+            internal static bool GetLocalUserRight(LocalUserRight Right, string Channel = null)
+            {
+                var buffer = new OutBuffer(new object[]
+                {
+                    (int)Right,
+                    Channel
+                });
+
+                uint size = 0;
+                var dataPtr = Commfort.GetData(GetterType.GetUserInfo, buffer, out size);
+                var position = 0;
+                var hasright = StaticPointerReader.ReadInteger(dataPtr, ref position) == 1 ? true : false;
+
+                Marshal.FreeHGlobal(dataPtr);
+
+                return hasright;
+            }
+
+            internal static bool IsModeratorOf(LocalUserRight Right, string Channel)
+            {
+                return GetLocalUserRight(LocalUserRight.ChannelModerator, Channel);
             }
         }
     }
