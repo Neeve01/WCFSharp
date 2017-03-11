@@ -21,29 +21,6 @@ namespace WCFSharp
         internal static CommfortProcess CFProcess;
         internal static CommfortGetData CFGetData;
 
-        /* unsafe public static byte[] GetData(uint FuncID, byte[] Buffer = null)
-        {
-            IntPtr UnmanagedArray = IntPtr.Zero;
-            if (Buffer != null)
-            {
-                UnmanagedArray = (IntPtr)Unmanaged.NewAndInit<byte>(Buffer.Length);
-                Marshal.Copy(Buffer, 0, UnmanagedArray, Buffer.Length);
-            }
-
-            uint Length = CFGetData(PluginID, FuncID, null, 0, Buffer != null ? (byte*)UnmanagedArray : null, Buffer != null ? (uint)Buffer.Length : 0);       
-
-            IntPtr ReturnArray = (IntPtr)Unmanaged.NewAndInit<byte>((int)Length);
-            CFGetData(PluginID, FuncID, (byte*)ReturnArray, Length, Buffer != null ? (byte*)UnmanagedArray : null, Buffer != null ? (uint)Buffer.Length : 0);
-
-            if (Buffer != null)
-                Unmanaged.Free((void*)UnmanagedArray);
-
-            byte[] Result = new byte[Length];
-            Marshal.Copy(ReturnArray, Result, 0, (int)Length);
-
-            return Result;
-        } */
-
         unsafe public static uint GetData(uint ID, void* InBuffer, uint InBufferSize, void* OutBuffer, uint OutBufferSize)
         {
             int Offset = 0;
