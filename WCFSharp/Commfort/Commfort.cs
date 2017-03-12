@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using WCFSharp.External;
 using WCFSharp.Types;
 using static WCFSharp.Commfort.Client;
 using static WCFSharp.Commfort.Client.Events;
@@ -37,7 +38,7 @@ namespace WCFSharp
 
         unsafe internal static void Process(uint OutEvent, IntPtr Buffer, uint BufferSize)
         {
-            Export.CFProcess(Commfort.PluginID, OutEvent, (byte*)Buffer, BufferSize); 
+            CommfortPlugin.CommfortProcess(PluginID, OutEvent, (byte*)Buffer, BufferSize); 
         }
 
         internal static void Process(Client.ProcedureType OutEvent, OutBuffer Buffer)
@@ -52,7 +53,7 @@ namespace WCFSharp
         /// </summary>
         unsafe internal static IntPtr GetData(uint FuncID, OutBuffer Buffer, out uint Size)
         {
-            Size = Export.CFGetData(PluginID, FuncID, null, 0, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
+            Size = CommfortPlugin.CommfortGetData(PluginID, FuncID, null, 0, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
 
             IntPtr dataPtr;
             if (Size != 0)
@@ -62,7 +63,7 @@ namespace WCFSharp
                 return IntPtr.Zero;
             }
 
-            Export.CFGetData(PluginID, FuncID, (byte*)dataPtr, Size, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
+            CommfortPlugin.CommfortGetData(PluginID, FuncID, (byte*)dataPtr, Size, (byte*)((Buffer != null) ? Buffer.MemoryPointer : IntPtr.Zero), (uint)(Buffer != null ? Buffer.Size : 0));
 
             return dataPtr;
         }
@@ -209,7 +210,7 @@ namespace WCFSharp
             {
                 var assembly = Handler.GetType().Assembly;
 
-                var entry = ConfigContainer.Config.Assemblies.FirstOrDefault(x => x.Assembly == assembly);
+                var entry = Globals.Config.Plugins.FirstOrDefault(x => x.Assembly == assembly);
                 if (entry == null)
                     throw new ArgumentException("Couldn't register handler. Unknown assembly.", "Handler");
 
@@ -224,7 +225,7 @@ namespace WCFSharp
             {
                 var assembly = Handler.GetType().Assembly;
 
-                var entry = ConfigContainer.Config.Assemblies.FirstOrDefault(x => x.Assembly == assembly);
+                var entry = Globals.Config.Plugins.FirstOrDefault(x => x.Assembly == assembly);
                 if (entry == null)
                     throw new ArgumentException("Couldn't unregister handler. Unknown assembly.", "Handler");
                 entry.Handlers.RemoveAll(x => x == Handler);

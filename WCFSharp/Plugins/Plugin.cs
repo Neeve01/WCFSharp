@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WCFSharp.Plugins
 {
-    internal class AssemblyEntry
+    internal class Plugin
     {
         [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
@@ -28,6 +28,11 @@ namespace WCFSharp.Plugins
         public override string ToString()
         {
             return Assembly.GetName().Name;
+        }
+
+        public Plugin(string Name)
+        {
+            this.Name = Name;
         }
     }
 }

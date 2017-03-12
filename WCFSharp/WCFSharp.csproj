@@ -114,12 +114,11 @@
     <Compile Include="GUI\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GUI\GUIContainer.cs" />
-    <Compile Include="Plugins\AssemblyEntry.cs" />
+    <Compile Include="Plugins\Plugin.cs" />
     <Compile Include="Plugins\PluginsLoader.cs" />
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Commfort\Client\Events.cs" />
-    <Compile Include="Export.cs" />
+    <Compile Include="External\CommfortPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Types\PluginAttributes.cs" />
     <Compile Include="Types\Readers.cs" />

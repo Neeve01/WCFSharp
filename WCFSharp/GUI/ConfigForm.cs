@@ -18,15 +18,6 @@ namespace WCFSharp.GUI
             InitializeComponent();
         }
 
-        private void PluginsCheckboxes_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            /* if (e.NewValue == CheckState.Checked)
-                PluginsHandler.Enable(PluginsCheckboxes.Items[e.Index] as AssemblyEntry);
-            else if (e.NewValue == CheckState.Unchecked)
-                PluginsHandler.Disable(PluginsCheckboxes.Items[e.Index] as AssemblyEntry);
-            ConfigContainer.Save(); */
-        }
-
         private void ReloadBtn_Click(object sender, EventArgs e)
         {
             PluginsHandler.Reload();
@@ -38,17 +29,12 @@ namespace WCFSharp.GUI
             if (e.Action != TreeViewAction.ByMouse && e.Action != TreeViewAction.ByKeyboard)
                 return;
 
-            var assembly = ConfigContainer.Config.Assemblies.FirstOrDefault(x => name == x.Assembly.FullName);
+            var assembly = Globals.Config.Plugins.FirstOrDefault(x => name == x.Assembly.FullName);
             if (e.Node.Checked)
                 PluginsHandler.Enable(assembly);
             else
                 PluginsHandler.Disable(assembly);
-            ConfigContainer.Save();
-        }
-
-        private void PluginsCheckboxes_BeforeCheck(object sender, TreeViewCancelEventArgs e)
-        {
-
+            Globals.SaveConfig();
         }
     }
 }

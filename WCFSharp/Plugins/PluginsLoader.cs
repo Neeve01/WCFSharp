@@ -14,10 +14,9 @@ namespace WCFSharp.Plugins
 {
     internal static class PluginsHandler
     {
-        public static void Enable(AssemblyEntry Entry)
+        public static void Enable(Plugin Entry)
         {
             Entry.Enabled = true;
-            Commfort.DebugMessage($"Enabling assembly {Entry.Assembly.GetName().Name}");
 
             var methods = Entry.Assembly.GetTypes()
                                         .SelectMany(t => t.GetMethods())
@@ -31,10 +30,9 @@ namespace WCFSharp.Plugins
             });
         }
 
-        public static void Disable(AssemblyEntry Entry)
+        public static void Disable(Plugin Entry)
         {
             Entry.Enabled = false;
-            Commfort.DebugMessage($"Disabling assembly {Entry.Assembly.GetName().Name}");
 
             var methods = Entry.Assembly.GetTypes()
                                         .SelectMany(t => t.GetMethods())
@@ -57,78 +55,68 @@ namespace WCFSharp.Plugins
 
         public static void Reload()
         {
-            ConfigContainer.ConfigPath = $"{Commfort.Client.GetSuggestedTempPath()}wcfsharp.json";
+            Globals.ConfigPath = Path.Combine(Commfort.Client.GetSuggestedTempPath(), "wcfsharp.json");
 
-            if (File.Exists(ConfigContainer.ConfigPath))
-                ConfigContainer.Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigContainer.ConfigPath));
+            if (File.Exists(Globals.ConfigPath))
+                Globals.Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Globals.ConfigPath));
             else
-                ConfigContainer.Config = new Config();
+                Globals.Config = new Config();
 
             Commfort.Handlers = new List<object>();
 
             if (!Directory.Exists("NetPlugins"))
                 Directory.CreateDirectory("NetPlugins");
 
-            var files = Directory.GetFiles("NetPlugins", "*.dll", SearchOption.AllDirectories);
-            foreach (var file in files)
+            Directory.GetFiles("NetPlugins", "*.dll", SearchOption.AllDirectories).ToList().ForEach(file =>
             {
                 Assembly assembly = null;
-                var filename = Path.GetFileName(file);
+                Plugin plugin = null;
                 try
                 {
-                    Commfort.DebugMessage($"Loading assembly {filename}...");
                     assembly = Assembly.LoadFrom(file);
 
-                    if (!ConfigContainer.Config.Assemblies.Any(x => x.Name == assembly.FullName))
-                    {
-                        ConfigContainer.Config.Assemblies.Add(new AssemblyEntry()
-                        {
-                            Enabled = false,
-                            Loaded = false,
-                            Name = assembly.FullName
-                        });
-                    }
+                    if (!Globals.Config.Plugins.Any(x => x.Name == assembly.FullName))
+                        Globals.Config.Plugins.Add(new Plugin(assembly.FullName));
 
-                    var entry = ConfigContainer.Config.Assemblies.FirstOrDefault(x => x.Name == assembly.FullName);
-                    if (entry.Loaded)
-                        throw new Exception($"{assembly.FullName} is already loaded! Possible duplicate?");
+                    plugin = Globals.Config.Plugins.FirstOrDefault(x => x.Name == assembly.FullName);
+                    if (plugin.Loaded)
+                        throw new Exception($"Assembly is already loaded. Possible duplicate?");
 
-                    entry.Loaded = true;
-                    entry.Assembly = assembly;
+                    plugin.Assembly = assembly;
 
-                    if (entry.Enabled)
-                        Enable(entry);
+                    if (plugin.Enabled)
+                        Enable(plugin);
+
+                    plugin.Loaded = true;
                 }
-                catch (Exception E)
+                catch
                 {
-                    Commfort.DebugMessage($"Couldn't load assembly {Path.GetFileName(file)}!\n{E.Message}");
                     if (assembly != null)
-                        ConfigContainer.Config.Assemblies.RemoveAll(x => x.Name == assembly.FullName);
+                    {
+                        if (plugin != null)
+                            Disable(plugin);
+                        else
+                            Globals.Config.Plugins.RemoveAll(x => x.Name == assembly.FullName);
+                    }
                 }
-            }
-            ConfigContainer.Save();
+            });
+            Globals.SaveConfig();
 
             FillConfigWindow();
         }
 
         public static void FillConfigWindow()
         {
-            if (GUIContainer.ConfigForm != null && GUIContainer.ConfigForm.IsHandleCreated)
+            if (Globals.ConfigForm != null && Globals.ConfigForm.IsHandleCreated)
             {
-                var cboxes = GUI.GUIContainer.ConfigForm.PluginsCheckboxes;
+                var cboxes = Globals.ConfigForm.PluginsCheckboxes;
                 cboxes.BeginInvoke(new Action(() =>
                 {
-                    try
+                    cboxes.Nodes.Clear();
+                    foreach (var entry in Globals.Config.Plugins)
                     {
-                        cboxes.Nodes.Clear();
-                        foreach (var entry in ConfigContainer.Config.Assemblies)
-                        {
-                            var node = cboxes.Nodes.Add(entry.Assembly.FullName, entry.Assembly.GetName().Name);
-                            node.Checked = entry.Enabled;
-                        }
-                    } catch (Exception E)
-                    {
-                        Commfort.DebugMessage(E.Message);
+                        var node = cboxes.Nodes.Add(entry.Assembly.FullName, entry.Assembly.GetName().Name);
+                        node.Checked = entry.Enabled;
                     }
                 }));
             }

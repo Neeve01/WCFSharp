@@ -12,17 +12,17 @@ using WCFSharp.GUI;
 using Newtonsoft.Json;
 using WCFSharp.Plugins;
 
-namespace WCFSharp
+namespace WCFSharp.External
 {
-    public static class Export
+    public static class CommfortPlugin
     {
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        internal unsafe delegate void CommfortProcess(uint PluginID, uint FuncID, byte* OutBuffer, uint OutBufferSize);
+        internal unsafe delegate void CommfortProcessDelegate(uint PluginID, uint FuncID, byte* OutBuffer, uint OutBufferSize);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        internal unsafe delegate uint CommfortGetData(uint PluginID, uint FuncID, byte* InBuffer, uint InBufferSize, byte* OutBuffer, uint OutBufferSize);
+        internal unsafe delegate uint CommfortGetDataDelegate(uint PluginID, uint FuncID, byte* InBuffer, uint InBufferSize, byte* OutBuffer, uint OutBufferSize);
 
-        internal static CommfortProcess CFProcess;
-        internal static CommfortGetData CFGetData;
+        internal static CommfortProcessDelegate CommfortProcess;
+        internal static CommfortGetDataDelegate CommfortGetData;
 
         unsafe public static uint GetData(uint ID, void* InBuffer, uint InBufferSize, void* OutBuffer, uint OutBufferSize)
         {
@@ -55,14 +55,14 @@ namespace WCFSharp
             try
             {                
                 Commfort.pluginID = ThisPluginID;
-                CFProcess = (CommfortProcess)Marshal.GetDelegateForFunctionPointer((IntPtr)Process, typeof(CommfortProcess));
-                CFGetData = (CommfortGetData)Marshal.GetDelegateForFunctionPointer((IntPtr)GetData, typeof(CommfortGetData));
+                CommfortProcess = (CommfortProcessDelegate)Marshal.GetDelegateForFunctionPointer((IntPtr)Process, typeof(CommfortProcessDelegate));
+                CommfortGetData = (CommfortGetDataDelegate)Marshal.GetDelegateForFunctionPointer((IntPtr)GetData, typeof(CommfortGetDataDelegate));
 
                 PluginsHandler.Reload();
 
                 // Create form
-                GUIContainer.ConfigForm = new ConfigForm();
-                GUIContainer.ConfigForm.HandleCreated += (sender, e) =>
+                Globals.ConfigForm = new ConfigForm();
+                Globals.ConfigForm.HandleCreated += (object sender, EventArgs e) =>
                 {
                     PluginsHandler.FillConfigWindow();
                 };
@@ -85,9 +85,13 @@ namespace WCFSharp
         public static void Stop()
         {
             Commfort.TokenSource.Cancel();
-            ConfigContainer.Save();
-            GUIContainer.ConfigForm.Close();
-            GUIContainer.ConfigForm.Dispose();
+            Globals.SaveConfig();
+
+            if (Globals.ConfigForm.IsHandleCreated)
+                Globals.ConfigForm.Close();
+
+            Globals.ConfigForm.Dispose();
+
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
@@ -99,7 +103,7 @@ namespace WCFSharp
 
         public static void ShowOptions()
         {
-            GUIContainer.ConfigForm?.Show();
+            Globals.ConfigForm?.Show();
         }
 
         public static void ShowAbout() { }

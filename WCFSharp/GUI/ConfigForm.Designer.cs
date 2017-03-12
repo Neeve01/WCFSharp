@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.LeftPanel = new System.Windows.Forms.Panel();
+            this.PluginsCheckboxes = new System.Windows.Forms.TreeView();
             this.RightPanel = new System.Windows.Forms.Panel();
             this.ReloadBtn = new System.Windows.Forms.Button();
-            this.PluginsCheckboxes = new System.Windows.Forms.TreeView();
             this.LeftPanel.SuspendLayout();
             this.RightPanel.SuspendLayout();
             this.SuspendLayout();
@@ -47,26 +47,6 @@
             this.LeftPanel.Size = new System.Drawing.Size(296, 198);
             this.LeftPanel.TabIndex = 0;
             // 
-            // RightPanel
-            // 
-            this.RightPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.RightPanel.Controls.Add(this.ReloadBtn);
-            this.RightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.RightPanel.Location = new System.Drawing.Point(296, 0);
-            this.RightPanel.Name = "RightPanel";
-            this.RightPanel.Size = new System.Drawing.Size(155, 198);
-            this.RightPanel.TabIndex = 1;
-            // 
-            // ReloadBtn
-            // 
-            this.ReloadBtn.Location = new System.Drawing.Point(8, 12);
-            this.ReloadBtn.Name = "ReloadBtn";
-            this.ReloadBtn.Size = new System.Drawing.Size(135, 30);
-            this.ReloadBtn.TabIndex = 0;
-            this.ReloadBtn.Text = "Reload configs";
-            this.ReloadBtn.UseVisualStyleBackColor = true;
-            this.ReloadBtn.Click += new System.EventHandler(this.ReloadBtn_Click);
-            // 
             // PluginsCheckboxes
             // 
             this.PluginsCheckboxes.CheckBoxes = true;
@@ -78,8 +58,27 @@
             this.PluginsCheckboxes.ShowRootLines = false;
             this.PluginsCheckboxes.Size = new System.Drawing.Size(296, 198);
             this.PluginsCheckboxes.TabIndex = 0;
-            this.PluginsCheckboxes.BeforeCheck += new System.Windows.Forms.TreeViewCancelEventHandler(this.PluginsCheckboxes_BeforeCheck);
             this.PluginsCheckboxes.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.PluginsCheckboxes_AfterCheck);
+            // 
+            // RightPanel
+            // 
+            this.RightPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.RightPanel.Controls.Add(this.ReloadBtn);
+            this.RightPanel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.RightPanel.Location = new System.Drawing.Point(295, 0);
+            this.RightPanel.Name = "RightPanel";
+            this.RightPanel.Size = new System.Drawing.Size(156, 198);
+            this.RightPanel.TabIndex = 1;
+            // 
+            // ReloadBtn
+            // 
+            this.ReloadBtn.Location = new System.Drawing.Point(8, 12);
+            this.ReloadBtn.Name = "ReloadBtn";
+            this.ReloadBtn.Size = new System.Drawing.Size(135, 30);
+            this.ReloadBtn.TabIndex = 0;
+            this.ReloadBtn.Text = "Reload configs";
+            this.ReloadBtn.UseVisualStyleBackColor = true;
+            this.ReloadBtn.Click += new System.EventHandler(this.ReloadBtn_Click);
             // 
             // ConfigForm
             // 

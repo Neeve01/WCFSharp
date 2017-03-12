@@ -18,7 +18,7 @@ Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "CommFort", "..\..\..\..\..\
 		StartingDirectory = C:\Program Files (x86)\CommFort
 		Environment = Default
 		LaunchingEngine = 92ef0900-2251-11d2-b72e-0000f87572ef
-		UseLegacyDebugEngines = No
+		UseLegacyDebugEngines = Yes
 		LaunchSQLEngine = No
 		AttachLaunchAction = No
 	EndProjectSection
